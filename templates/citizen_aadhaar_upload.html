@@ -1,0 +1,125 @@
+{% extends 'citizen_base.html' %}
+{% block content %}
+
+{% set needs_aadhaar = not user_data.aadhaar_verified %}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h5 class="mb-1">Aadhaar Identity Profile</h5>
+                <p class="text-muted small mb-0">Official identity records extracted via OCR</p>
+            </div>
+            {% if not needs_aadhaar %}
+            <div class="text-end">
+                <span class="badge bg-success text-white p-2 px-3 rounded-pill">
+                    <i class="fas fa-check-circle me-1"></i> Verified Account
+                </span>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if not needs_aadhaar %}
+        <div class="alert alert-success d-flex align-items-center mb-4 border-0" style="background-color: #e8f5e9;">
+            <div class="me-3">
+                <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+            </div>
+            <div>
+                <strong class="text-success">Identity Confirmed</strong><br>
+                <span class="small text-muted">Your profile details are synced with your Aadhaar card and cannot be edited.</span>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-warning d-flex align-items-center mb-4 border-0" style="background-color: #fff3e0;">
+            <div class="me-3">
+                <div class="rounded-circle bg-warning text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+            </div>
+            <div>
+                <strong class="text-warning">Action Required</strong><br>
+                <span class="small text-muted">Please verify your details below to unlock all citizen services.</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <form action="{{ url_for('citizen.aadhaar_upload') }}" method="POST">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small text-secondary">FULL NAME</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-user text-muted"></i></span>
+                        <input type="text" name="full_name" class="form-control border-start-0" 
+                               value="{{ user_data.full_name or '' }}" 
+                               {% if not needs_aadhaar %} readonly style="background-color: #f8f9fa; cursor: not-allowed;" {% endif %}>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small text-secondary">AADHAAR NUMBER</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-id-card text-muted"></i></span>
+                        <input type="text" name="aadhaar_number" class="form-control border-start-0" 
+                               value="{{ user_data.aadhaar_number or '' }}" 
+                               {% if not needs_aadhaar %} readonly style="background-color: #f8f9fa; cursor: not-allowed;" {% endif %}>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small text-secondary">DATE OF BIRTH</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-calendar-alt text-muted"></i></span>
+                        <input type="text" name="dob" class="form-control border-start-0" 
+                               value="{{ user_data.dob or '' }}" 
+                               {% if not needs_aadhaar %} readonly style="background-color: #f8f9fa; cursor: not-allowed;" {% endif %}>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small text-secondary">GENDER</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-venus-mars text-muted"></i></span>
+                        <input type="text" name="gender" class="form-control border-start-0" 
+                               value="{{ user_data.gender or '' }}" 
+                               {% if not needs_aadhaar %} readonly style="background-color: #f8f9fa; cursor: not-allowed;" {% endif %}>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-bold small text-secondary">REGISTERED ADDRESS</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-map-marker-alt text-muted"></i></span>
+                        <textarea name="address" class="form-control border-start-0" rows="2"
+                                  {% if not needs_aadhaar %} readonly style="background-color: #f8f9fa; cursor: not-allowed;" {% endif %}>{{ user_data.aadhaar_address or '' }}</textarea>
+                    </div>
+                </div>
+                
+                {% if needs_aadhaar %}
+                <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm py-2">
+                        <i class="fas fa-save me-2"></i> Save and Verify Profile
+                    </button>
+                </div>
+                {% else %}
+                <div class="col-12 mt-4 text-center">
+                    <div class="py-3 border-top">
+                        <span class="text-muted small">
+                            <i class="fas fa-lock me-2"></i> Verified identity details cannot be modified.
+                        </span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .input-group-text { border-color: #dee2e6; }
+    .form-control:focus { box-shadow: none; border-color: #dee2e6; }
+    .form-control:read-only { color: #6c757d; border-color: #e9ecef; }
+</style>
+
+{% endblock %}

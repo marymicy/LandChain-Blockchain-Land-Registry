@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citizen Registration | Sovereign Ledger</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { min-height:100vh; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; background:#000c17; background-image:url('https://images.unsplash.com/photo-1529070538774-1843cb3265df?q=80&w=2000'); background-size:cover; background-position:center; }
+        body::before { content:''; position:fixed; inset:0; background:rgba(0,12,23,0.88); z-index:0; }
+        .wrap { position:relative; z-index:1; width:100%; max-width:500px; padding:20px; }
+        .card { background:rgba(255,255,255,0.03); border:1px solid rgba(184,134,11,0.35); border-top:3px solid #b8860b; padding:40px; }
+        .brand { text-align:center; margin-bottom:24px; }
+        .brand h2 { font-family:'Cinzel',serif; color:#b8860b; font-size:1.05rem; letter-spacing:3px; margin-bottom:5px; }
+        .brand p { font-size:0.62rem; color:rgba(255,255,255,0.3); letter-spacing:2px; text-transform:uppercase; }
+
+        /* Steps indicator */
+        .steps { display:flex; justify-content:center; gap:0; margin-bottom:28px; }
+        .step { flex:1; text-align:center; padding:8px 4px; font-size:0.6rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; border-bottom:2px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.25); }
+        .step.active { color:#b8860b; border-bottom-color:#b8860b; }
+        .step.done   { color:#3fb950; border-bottom-color:#3fb950; }
+
+        .section-label { font-size:0.58rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:rgba(184,134,11,0.6); margin-bottom:14px; padding-bottom:6px; border-bottom:1px solid rgba(184,134,11,0.15); }
+        .form-label { display:block; font-size:0.62rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.35); margin-bottom:6px; }
+        .form-control { width:100%; background:rgba(255,255,255,0.04); border:1px solid rgba(184,134,11,0.22); color:#e6edf3; padding:11px 14px; font-size:0.85rem; font-family:'Inter',sans-serif; outline:none; transition:0.2s; }
+        .form-control:focus { border-color:rgba(184,134,11,0.6); background:rgba(255,255,255,0.06); }
+        .form-control::placeholder { color:rgba(255,255,255,0.15); }
+        .mb-field { margin-bottom:16px; }
+        .field-hint { font-size:0.62rem; color:rgba(255,255,255,0.2); margin-top:4px; }
+
+        /* Upload area */
+        .upload-area {
+            border: 2px dashed rgba(184,134,11,0.35);
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+            margin-bottom: 12px;
+        }
+        .upload-area:hover { border-color:rgba(184,134,11,0.7); background:rgba(184,134,11,0.04); }
+        .upload-area input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+        .upload-icon { font-size:2rem; margin-bottom:8px; }
+        .upload-text { font-size:0.78rem; color:rgba(255,255,255,0.4); }
+        .upload-text strong { color:rgba(184,134,11,0.8); }
+        #preview-box { display:none; margin-top:12px; }
+        #preview-box img { max-width:100%; border:1px solid rgba(184,134,11,0.3); }
+        #file-name { font-size:0.68rem; color:#3fb950; margin-top:6px; }
+
+        .btn-submit { width:100%; padding:13px; background:#b8860b; color:#000; border:none; font-family:'Inter',sans-serif; font-size:0.72rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; cursor:pointer; transition:0.2s; margin-top:8px; }
+        .btn-submit:hover { background:#d4a017; }
+        .divider { width:100%; height:1px; background:linear-gradient(to right,transparent,rgba(184,134,11,0.25),transparent); margin:20px 0; }
+        .alert-box { background:rgba(220,53,69,0.1); border:1px solid rgba(220,53,69,0.3); color:#f85149; font-size:0.75rem; padding:10px 14px; margin-bottom:16px; }
+        .info-box { background:rgba(184,134,11,0.06); border:1px solid rgba(184,134,11,0.2); padding:12px 14px; margin-bottom:20px; font-size:0.72rem; color:rgba(255,255,255,0.45); line-height:1.6; }
+        .footer-links { text-align:center; font-size:0.72rem; color:rgba(255,255,255,0.25); line-height:2; }
+        .footer-links a { color:rgba(184,134,11,0.7); text-decoration:none; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="card">
+            <div class="brand">
+                <h2>Citizen Registration</h2>
+                <p>Sovereign Ledger — Telangana</p>
+            </div>
+
+            <div class="steps">
+                <div class="step active">1. Account Details</div>
+                <div class="step active">2. Aadhaar Upload</div>
+                <div class="step">3. Verified ✓</div>
+            </div>
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}{% for m in messages %}
+                    <div class="alert-box">{{ m }}</div>
+                {% endfor %}{% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('citizen.signup') }}"
+                  enctype="multipart/form-data" autocomplete="off">
+                <input type="text" style="display:none;" aria-hidden="true" tabindex="-1">
+                <input type="password" style="display:none;" aria-hidden="true" tabindex="-1">
+
+                <!-- Account Details -->
+                <div class="section-label">Account Details</div>
+                <div class="mb-field">
+                    <label class="form-label">Username</label>
+                    <input type="text" name="username" class="form-control"
+                           placeholder="Choose a username" required
+                           autocomplete="off" readonly onfocus="this.removeAttribute('readonly')">
+                </div>
+                <div class="mb-field">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control"
+                           placeholder="Create a password" required
+                           autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')">
+                </div>
+                <div class="mb-field">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" id="confirm_pw" class="form-control"
+                           placeholder="Re-enter password" required
+                           autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')">
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Aadhaar Upload -->
+                <div class="section-label">Aadhaar Document Verification</div>
+
+                <div class="info-box">
+                    📄 Upload a photo of your Aadhaar card. The system will automatically extract and verify your Aadhaar number from the document.
+                </div>
+
+                <div class="upload-area" id="upload-area">
+                    <input type="file" name="aadhaar_doc" id="aadhaar_doc"
+                           accept="image/*" onchange="previewFile(this)" required>
+                    <div class="upload-icon">🪪</div>
+                    <div class="upload-text">
+                        <strong>Click to upload</strong> or drag and drop<br>
+                        Aadhaar card image (JPG, PNG)
+                    </div>
+                </div>
+                <div id="preview-box">
+                    <img id="preview-img" src="" alt="Aadhaar preview">
+                    <div id="file-name"></div>
+                </div>
+
+                <button type="submit" class="btn-submit" onclick="return checkForm()">
+                    Verify Aadhaar &amp; Create Account
+                </button>
+            </form>
+
+            <div class="divider"></div>
+            <div class="footer-links">
+                Already registered? <a href="{{ url_for('citizen.login') }}">Sign In</a><br>
+                <a href="{{ url_for('landing') }}">← Back to Gateway</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function previewFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('preview-img').src = e.target.result;
+                document.getElementById('file-name').textContent = '✓ ' + file.name;
+                document.getElementById('preview-box').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function checkForm() {
+            const pw  = document.querySelector('input[name="password"]').value;
+            const cpw = document.getElementById('confirm_pw').value;
+            if (pw !== cpw) { alert('Passwords do not match.'); return false; }
+            const doc = document.getElementById('aadhaar_doc').files[0];
+            if (!doc)  { alert('Please upload your Aadhaar document.'); return false; }
+            return true;
+        }
+    </script>
+</body>
+</html>

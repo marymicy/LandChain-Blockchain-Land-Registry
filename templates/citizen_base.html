@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citizen Portal | Sovereign Ledger</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-bg: #001529;
+            --gold: #b8860b;
+            --active-blue: #1890ff;
+            --surface: #f5f7fa;
+            --border: #e8e8e8;
+            --sidebar-w: 240px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--surface); font-family: 'Inter', sans-serif; display: flex; height: 100vh; overflow: hidden; }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-w); background: var(--sidebar-bg);
+            height: 100vh; display: flex; flex-direction: column;
+            flex-shrink: 0; position: fixed; top: 0; left: 0; z-index: 200;
+            overflow-y: auto;
+        }
+        .sidebar::-webkit-scrollbar { width: 3px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+
+        .sidebar-brand { padding: 20px 18px 16px; background: #000c17; border-bottom: 2px solid var(--gold); text-align: center; flex-shrink: 0; }
+        .sidebar-brand h4 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 0.9rem; letter-spacing: 2px; margin: 0 0 2px; }
+        .sidebar-brand small { color: rgba(255,255,255,0.3); font-size: 0.58rem; letter-spacing: 2px; text-transform: uppercase; }
+
+        .nav-section { font-size: 0.58rem; font-weight: 700; color: rgba(255,255,255,0.25); padding: 14px 18px 5px; text-transform: uppercase; letter-spacing: 2px; }
+
+        .nav-link { color: rgba(255,255,255,0.5); font-size: 0.78rem; font-weight: 500; padding: 9px 18px; display: flex; align-items: center; text-decoration: none; border-left: 3px solid transparent; transition: 0.2s; }
+        .nav-link i { width: 18px; margin-right: 10px; font-size: 0.85rem; }
+        .nav-link:hover { color: white; background: rgba(255,255,255,0.06); border-left-color: rgba(255,255,255,0.2); }
+        .nav-link.active { color: white !important; background: var(--active-blue) !important; border-left-color: var(--active-blue) !important; }
+
+        .sidebar-footer { margin-top: auto; padding: 14px; border-top: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+        .btn-logout { display: block; width: 100%; padding: 8px; background: transparent; border: 1px solid rgba(220,53,69,0.4); color: #ff7875; font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; text-decoration: none; text-align: center; transition: 0.2s; border-radius: 2px; }
+        .btn-logout:hover { background: rgba(220,53,69,0.1); color: #ff7875; }
+
+        /* ── MAIN ── */
+        .main-content { margin-left: var(--sidebar-w); flex-grow: 1; overflow-y: auto; background: var(--surface); height: 100vh; }
+        .main-content::-webkit-scrollbar { width: 4px; }
+        .main-content::-webkit-scrollbar-thumb { background: #d9d9d9; border-radius: 2px; }
+
+        .top-bar { background: white; padding: 12px 32px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+        .top-bar .user-pill { font-size: 0.72rem; font-weight: 600; color: #333; }
+        .top-bar .user-pill span { color: var(--active-blue); }
+        .status-dot { font-size: 0.68rem; color: #52c41a; font-weight: 600; }
+
+        .notif-btn { position: relative; background: none; border: none; color: #666; font-size: 1rem; cursor: pointer; padding: 4px 8px; transition: color 0.2s; }
+        .notif-btn:hover { color: var(--active-blue); }
+        .notif-badge { position: absolute; top: 0; right: 0; background: #ff4d4f; color: white; font-size: 0.5rem; font-weight: 700; width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+        .page-body { padding: 28px 32px; }
+
+        /* ── FLASH ── */
+        .flash-container { position: fixed; top: 70px; right: 24px; z-index: 9999; max-width: 340px; }
+        .flash-alert { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 4px; font-size: 0.78rem; font-weight: 600; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); animation: slideIn 0.3s ease; }
+        .flash-alert.success { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+        .flash-alert.danger  { background: #fff2f0; color: #cf1322; border: 1px solid #ffa39e; }
+        .flash-alert.warning { background: #fffbe6; color: #d46b08; border: 1px solid #ffe58f; }
+        .flash-alert.info    { background: #e6f7ff; color: #096dd9; border: 1px solid #91d5ff; }
+        @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* ── SHARED COMPONENT STYLES (used across all child templates) ── */
+
+        /* Stat Cards */
+        .stat-card {
+            background: white; border-radius: 8px; padding: 16px 20px;
+            border-left: 4px solid #1890ff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+        .stat-card.green { border-left-color: #52c41a; }
+        .stat-card.gold  { border-left-color: #b8860b; }
+        .stat-card small {
+            display: block; color: #888; font-size: 0.72rem;
+            margin-bottom: 6px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .stat-card h4 { margin: 0; font-size: 1.4rem; font-weight: 700; color: #1a1a1a; }
+
+        /* Content Cards */
+        .c-card {
+            background: white; border-radius: 8px; border: 1px solid #eee;
+            overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+        .c-card-header {
+            padding: 14px 20px; border-bottom: 1px solid #f0f0f0;
+            display: flex; justify-content: space-between; align-items: center;
+            background: #fafafa;
+        }
+        .c-card-title { font-weight: 700; font-size: 0.85rem; color: #1a1a1a; }
+
+        /* Tables */
+        .c-table { width: 100%; font-size: 0.82rem; border-collapse: collapse; }
+        .c-table thead th {
+            padding: 10px 14px; background: #f8f9fb;
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; color: #888;
+            border-bottom: 2px solid #eee; white-space: nowrap;
+        }
+        .c-table tbody td {
+            padding: 11px 14px; border-bottom: 1px solid #f5f5f5;
+            vertical-align: middle;
+        }
+        .c-table tbody tr:last-child td { border-bottom: none; }
+        .c-table tbody tr:hover { background: #fafbff; }
+
+        /* Badges */
+        .b-info     { background:#e6f7ff; color:#0958d9; border:1px solid #91caff;  border-radius:4px; padding:2px 8px; font-size:0.68rem; font-weight:700; display:inline-block; }
+        .b-approved { background:#f6ffed; color:#389e0d; border:1px solid #b7eb8f;  border-radius:4px; padding:2px 8px; font-size:0.68rem; font-weight:700; display:inline-block; }
+        .b-rejected { background:#fff1f0; color:#cf1322; border:1px solid #ffa39e;  border-radius:4px; padding:2px 8px; font-size:0.68rem; font-weight:700; display:inline-block; }
+        .b-pending  { background:#fffbe6; color:#d46b08; border:1px solid #ffe58f;  border-radius:4px; padding:2px 8px; font-size:0.68rem; font-weight:700; display:inline-block; }
+        .b-verified { background:#f6ffed; color:#389e0d; border:1px solid #b7eb8f;  border-radius:4px; padding:2px 8px; font-size:0.68rem; font-weight:700; display:inline-block; }
+
+        /* Form elements */
+        .f-label { display:block; font-size:0.68rem; font-weight:700; color:#555; letter-spacing:0.5px; margin-bottom:4px; }
+        .f-input {
+            width:100%; border:1px solid #d9d9d9; border-radius:4px;
+            padding:8px 12px; font-size:0.82rem; color:#333;
+            font-family:'Inter',sans-serif; outline:none; transition:border-color 0.2s;
+            background:white;
+        }
+        .f-input:focus { border-color:#1890ff; box-shadow:0 0 0 2px rgba(24,144,255,0.1); }
+        .f-select {
+            width:100%; border:1px solid #d9d9d9; border-radius:4px;
+            padding:8px 12px; font-size:0.82rem; color:#333;
+            font-family:'Inter',sans-serif; outline:none; background:white;
+        }
+
+        /* Primary button */
+        .btn-primary-c {
+            background:#1890ff; color:white; border:none;
+            padding:8px 18px; font-size:0.72rem; font-weight:700;
+            letter-spacing:1px; text-transform:uppercase;
+            border-radius:4px; cursor:pointer; transition:background 0.2s;
+            font-family:'Inter',sans-serif;
+        }
+        .btn-primary-c:hover { background:#096dd9; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <h4><i class="fas fa-landmark me-1"></i> CITIZEN</h4>
+        <small>Sovereign Asset Portal</small>
+    </div>
+    <nav>
+        <div class="nav-section">Personal Treasury</div>
+        <a class="nav-link {% if request.endpoint == 'citizen.dashboard' %}active{% endif %}"
+           href="{{ url_for('citizen.dashboard') }}">
+            <i class="fas fa-chart-line"></i> Overview
+        </a>
+        <a class="nav-link {% if request.endpoint == 'citizen.my_properties' %}active{% endif %}"
+           href="{{ url_for('citizen.my_properties') }}">
+            <i class="fas fa-home"></i> My Land Assets
+        </a>
+        <a class="nav-link {% if request.endpoint in ['citizen.aadhaar_profile','citizen.aadhaar_upload'] %}active{% endif %}"
+           href="{{ url_for('citizen.aadhaar_profile') }}">
+            <i class="fas fa-id-card"></i> Aadhaar Profile
+            {% if not aadhaar_verified %}
+            <span style="background:#ff4d4f;color:white;font-size:0.5rem;font-weight:700;padding:1px 5px;border-radius:10px;margin-left:auto;">!</span>
+            {% endif %}
+        </a>
+
+        <div class="nav-section">Operations</div>
+        <a class="nav-link {% if request.endpoint == 'citizen.audit_trail' %}active{% endif %}"
+           href="{{ url_for('citizen.audit_trail') }}">
+            <i class="fas fa-link"></i> Blockchain Audit
+        </a>
+        <a class="nav-link {% if request.endpoint == 'citizen.forensic_verify' %}active{% endif %}"
+           href="{{ url_for('citizen.forensic_verify') }}">
+            <i class="fas fa-microscope"></i> Forensic Verifier
+        </a>
+        <a class="nav-link {% if request.endpoint == 'citizen.transfer_history' %}active{% endif %}"
+           href="{{ url_for('citizen.transfer_history') }}">
+            <i class="fas fa-history"></i> Transfer History
+        </a>
+        <a class="nav-link {% if request.endpoint == 'citizen.dispute_filing' %}active{% endif %}"
+           href="{{ url_for('citizen.dispute_filing') }}">
+            <i class="fas fa-balance-scale"></i> Dispute Filing
+        </a>
+
+        <div class="nav-section">Public Registry</div>
+        <a class="nav-link {% if request.endpoint == 'citizen.market_listings' %}active{% endif %}"
+           href="{{ url_for('citizen.market_listings') }}">
+            <i class="fas fa-map-marked-alt"></i> Market Listings
+        </a>
+        <a class="nav-link {% if request.endpoint == 'citizen.taxation' %}active{% endif %}"
+           href="{{ url_for('citizen.taxation') }}">
+            <i class="fas fa-file-invoice-dollar"></i> Taxation &amp; Dues
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <a href="/logout" class="btn-logout"><i class="fas fa-power-off me-1"></i> Terminate Session</a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="top-bar">
+        <div class="user-pill">Identity: <span>{{ user }}</span> &nbsp;|&nbsp; Protocol: Sovereign-L1</div>
+        <div class="d-flex align-items-center gap-3">
+            {% if aadhaar_verified %}
+            <span style="background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;font-size:0.65rem;font-weight:700;padding:4px 10px;border-radius:3px;letter-spacing:1px;">
+                ✓ AADHAAR VERIFIED{% if aadhaar_suffix %} · ****{{ aadhaar_suffix }}{% endif %}
+            </span>
+            {% else %}
+            <a href="{{ url_for('citizen.aadhaar_upload') }}"
+               style="background:#fff7e6;color:#d46b08;border:1px solid #ffd591;font-size:0.65rem;font-weight:700;padding:4px 10px;border-radius:3px;letter-spacing:1px;text-decoration:none;">
+                ⚠ AADHAAR UNVERIFIED — Verify Now
+            </a>
+            {% endif %}
+
+            {% if notif_count is defined and notif_count > 0 %}
+            <button class="notif-btn" onclick="window.location.href='{{ url_for('citizen.notifications') }}'">
+                <i class="fas fa-bell"></i>
+                <span class="notif-badge">{{ notif_count }}</span>
+            </button>
+            {% else %}
+            <button class="notif-btn"><i class="far fa-bell"></i></button>
+            {% endif %}
+
+            <div class="status-dot"><i class="fas fa-circle me-1" style="font-size:0.5rem;"></i>LEDGER_SYNC_ACTIVE</div>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="flash-alert {{ category }}">
+                {% if category == 'success' %}<i class="fas fa-check-circle"></i>
+                {% elif category == 'danger' %}<i class="fas fa-exclamation-circle"></i>
+                {% else %}<i class="fas fa-info-circle"></i>{% endif %}
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="page-body">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    setTimeout(() => {
+        document.querySelectorAll('.flash-alert').forEach(el => {
+            el.style.transition = 'opacity 0.5s';
+            el.style.opacity = '0';
+            setTimeout(() => el.remove(), 500);
+        });
+    }, 4000);
+</script>
+</body>
+</html>

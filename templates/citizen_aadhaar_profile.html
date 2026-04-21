@@ -1,0 +1,353 @@
+{% extends 'citizen_base.html' %}
+
+{% block content %}
+<style>
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 24px;
+    }
+    .section-header h5 {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #001529;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin: 0;
+    }
+    .section-header .badge-pill {
+        font-size: 0.58rem;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 10px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+    .badge-verified   { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+    .badge-unverified { background: #fff7e6; color: #d46b08; border: 1px solid #ffd591; }
+
+    /* ── PROFILE CARD ── */
+    .profile-card {
+        background: white;
+        border: 1px solid #e8e8e8;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    .profile-card-header {
+        background: #001529;
+        padding: 18px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .profile-card-header .title {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: rgba(255,255,255,0.5);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+    .profile-card-body { padding: 24px; }
+
+    /* ── IDENTITY ROW ── */
+    .identity-row {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #f0f0f0;
+        margin-bottom: 20px;
+    }
+    .id-avatar {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #001529, #1890ff);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        color: white;
+        flex-shrink: 0;
+    }
+    .id-name { font-size: 1.05rem; font-weight: 700; color: #001529; }
+    .id-sub  { font-size: 0.68rem; color: #8c8c8c; margin-top: 2px; }
+    .id-username { font-size: 0.72rem; color: #1890ff; font-weight: 600; margin-top: 4px; }
+
+    /* ── AADHAAR DISPLAY ── */
+    .aadhaar-display {
+        background: linear-gradient(135deg, #001529 0%, #003a70 100%);
+        border-radius: 8px;
+        padding: 16px 20px;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+    .aadhaar-display .label {
+        font-size: 0.55rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: rgba(255,255,255,0.45);
+        text-transform: uppercase;
+        margin-bottom: 4px;
+    }
+    .aadhaar-display .number {
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 4px;
+        color: #b8860b;
+    }
+    .aadhaar-display .verified-chip {
+        background: rgba(82,196,26,0.15);
+        border: 1px solid rgba(82,196,26,0.4);
+        color: #95de64;
+        font-size: 0.6rem;
+        font-weight: 700;
+        padding: 5px 10px;
+        border-radius: 4px;
+        letter-spacing: 1px;
+    }
+    .aadhaar-display .unverified-chip {
+        background: rgba(255,77,79,0.15);
+        border: 1px solid rgba(255,77,79,0.4);
+        color: #ff7875;
+        font-size: 0.6rem;
+        font-weight: 700;
+        padding: 5px 10px;
+        border-radius: 4px;
+        letter-spacing: 1px;
+    }
+
+    /* ── INFO GRID ── */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    .info-cell {
+        background: #f8f9fb;
+        border: 1px solid #efefef;
+        border-radius: 5px;
+        padding: 10px 14px;
+    }
+    .info-cell .lbl { font-size: 0.58rem; font-weight: 700; color: #8c8c8c; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 3px; }
+    .info-cell .val { font-size: 0.8rem; font-weight: 600; color: #333; }
+
+    /* ── FORM ── */
+    .form-section-title {
+        font-size: 0.62rem;
+        font-weight: 700;
+        color: #8c8c8c;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        padding: 12px 0 8px;
+        border-top: 1px solid #f0f0f0;
+        margin-bottom: 12px;
+    }
+    .form-label {
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: #555;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+    .form-control, .form-select {
+        font-size: 0.78rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 8px 12px;
+        background: white;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        color: #333;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #1890ff;
+        box-shadow: 0 0 0 3px rgba(24,144,255,0.1);
+        outline: none;
+    }
+    .btn-save {
+        background: #1890ff;
+        color: white;
+        border: none;
+        padding: 9px 24px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .btn-save:hover { background: #096dd9; }
+
+    .btn-upload-link {
+        background: transparent;
+        border: 1px solid #1890ff;
+        color: #1890ff;
+        padding: 9px 20px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-block;
+        transition: 0.2s;
+    }
+    .btn-upload-link:hover { background: #e6f7ff; color: #096dd9; }
+</style>
+
+<!-- Section Header -->
+<div class="section-header">
+    <h5><i class="fas fa-id-card me-2" style="color:#1890ff;"></i>Aadhaar Identity Profile</h5>
+    {% if aadhaar_verified %}
+    <span class="badge-pill badge-verified">✓ Verified</span>
+    {% else %}
+    <span class="badge-pill badge-unverified">⚠ Unverified</span>
+    {% endif %}
+</div>
+
+<div class="row g-4">
+
+    <!-- ── LEFT: Identity Card ── -->
+    <div class="col-lg-4">
+        <div class="profile-card">
+            <div class="profile-card-header">
+                <span class="title">Citizen Identity</span>
+                <i class="fas fa-shield-alt" style="color: #b8860b; font-size:0.85rem;"></i>
+            </div>
+            <div class="profile-card-body">
+
+                <!-- Avatar + Name -->
+                <div class="identity-row">
+                    <div class="id-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <div class="id-name">
+                            {{ user_data.full_name if user_data and user_data.full_name else '—' }}
+                        </div>
+                        <div class="id-sub">Registered Citizen</div>
+                        <div class="id-username">@{{ user }}</div>
+                    </div>
+                </div>
+
+                <!-- Aadhaar Number Display -->
+                <div class="aadhaar-display">
+                    <div>
+                        <div class="label">Aadhaar Number</div>
+                        <div class="number">
+                            {% if user_data and user_data.aadhaar_number %}
+                                **** **** {{ user_data.aadhaar_number | string | truncate(4, True, '') | replace('...','') }}{{ (user_data.aadhaar_number | string)[-4:] }}
+                            {% else %}
+                                — — — —
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if aadhaar_verified %}
+                    <span class="verified-chip">✓ ACTIVE</span>
+                    {% else %}
+                    <span class="unverified-chip">✗ PENDING</span>
+                    {% endif %}
+                </div>
+
+                <!-- Info Grid -->
+                <div class="info-grid">
+                    <div class="info-cell">
+                        <div class="lbl">Gender</div>
+                        <div class="val">{{ user_data.gender if user_data and user_data.gender else '—' }}</div>
+                    </div>
+                    <div class="info-cell">
+                        <div class="lbl">Date of Birth</div>
+                        <div class="val">{{ user_data.dob if user_data and user_data.dob else '—' }}</div>
+                    </div>
+                    <div class="info-cell">
+                        <div class="lbl">Role</div>
+                        <div class="val" style="color:#1890ff;">Citizen</div>
+                    </div>
+                </div>
+
+                <!-- Re-upload / Upload Link -->
+                {% if aadhaar_verified %}
+                <a href="{{ url_for('citizen.aadhaar_upload') }}" class="btn-upload-link" style="width:100%; text-align:center;">
+                    <i class="fas fa-redo me-1"></i> Re-upload Aadhaar
+                </a>
+                {% else %}
+                <a href="{{ url_for('citizen.aadhaar_upload') }}" class="btn-save" style="width:100%; text-align:center; display:block; text-decoration:none;">
+                    <i class="fas fa-upload me-1"></i> Upload & Verify Aadhaar
+                </a>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ── RIGHT: Editable Profile Form ── -->
+    <div class="col-lg-8">
+        <div class="profile-card">
+            <div class="profile-card-header">
+                <span class="title">Contact &amp; Demographic Details</span>
+                <i class="fas fa-edit" style="color:rgba(255,255,255,0.3); font-size:0.85rem;"></i>
+            </div>
+            <div class="profile-card-body">
+                <form method="POST" action="{{ url_for('citizen.aadhaar_profile') }}">
+
+                    <!-- Contact -->
+                    <div class="form-section-title"><i class="fas fa-phone me-1"></i>Contact Information</div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" name="email" class="form-control"
+                                   placeholder="you@example.com"
+                                   value="{{ user_data.email if user_data and user_data.email else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Mobile Number</label>
+                            <input type="text" name="mobile" class="form-control"
+                                   placeholder="+91 XXXXX XXXXX"
+                                   value="{{ user_data.mobile if user_data and user_data.mobile else '' }}">
+                        </div>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="form-section-title"><i class="fas fa-map-marker-alt me-1"></i>Address</div>
+                    <div class="mb-3">
+                        <label class="form-label">Residential Address</label>
+                        <textarea name="address" class="form-control" rows="3"
+                                  placeholder="Door No., Street, City, State – PIN">{{ user_data.address if user_data and user_data.address else '' }}</textarea>
+                    </div>
+
+                    <!-- Economic -->
+                    <div class="form-section-title"><i class="fas fa-briefcase me-1"></i>Economic Profile</div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Occupation</label>
+                            <input type="text" name="occupation" class="form-control"
+                                   placeholder="e.g. Farmer, Software Engineer"
+                                   value="{{ user_data.occupation if user_data and user_data.occupation else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Annual Income (₹)</label>
+                            <input type="number" name="annual_income" class="form-control"
+                                   placeholder="e.g. 500000"
+                                   value="{{ user_data.annual_income if user_data and user_data.annual_income else '' }}">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save me-1"></i> Save Changes
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
